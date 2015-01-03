@@ -3,6 +3,8 @@ use cql_header::Header;
 
 use std::io::IoResult;
 use std::io::TcpStream;
+use std::io::IoError;
+use std::io::IoErrorKind;
 
 //~ use std::sync::{Once, ONCE_INIT};
 //~ static INIT: Once = ONCE_INIT;
@@ -33,17 +35,23 @@ impl CqlStream for TcpStream {
                 let frame:Frame = Header::frame_it(response, bytes);
                 //get a reference to a mutable slice of just the body bytes of the frame (everything after byte 9)
                 self.match_len(frame)
+
+        
             }
         }
     }}
 
     fn match_len<'a>(&'a mut self, frame:Frame<'a>) -> IoResult<Frame<'a>> {
         debug!("match_len says: {}", frame.get_header().body_length);
-        let len = frame.get_header().body_length.length as uint;
+        let len = frame.len() as uint;
         match len {
             0...8 => {
                 debug!("short header: {}",len);
-                Ok(frame)
+                Err(IoError{
+                    kind:IoErrorKind::EndOfFile,
+                    desc:"frame less than 9 bytes",
+                    detail:Some(format!("Only {} bytes were returned.",len))
+                    })
             },
             9 => {
                 debug!("header size frame: {}",len);

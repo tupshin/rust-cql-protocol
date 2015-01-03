@@ -14,6 +14,9 @@ pub fn main() {
         Err(_) => debug!("failed to connect"),
         Ok(mut stream) => {
             debug!("startup response says: {}", startup(&mut stream));
+
+            //the second one should fail because the stream is already initialized
+            debug!("startup response says: {}", startup(&mut stream));
            // debug!("query response says: {}", query(&mut stream, "select * from foo.bar".to_string()));
         }
     }
@@ -24,13 +27,14 @@ fn startup(stream:&mut CqlStream) {
     let response_bytes = &mut Vec::new();
     let frame = Frame::build_startup(outbound_body_bytes);
     debug!("startup frame {}",frame);
-    debug!("startup header {}",frame.get_header().to_bytes());
     match stream.write_frame(frame) {
         Err(err) => panic!("response: {}", err),
         Ok(_) => match stream.get_next_frame(response_bytes) {
-            Err(_) => {panic!()},
+            Err(err) => {panic!(err)},
             Ok(frame) => {
-                debug!("response: {}",frame.get_header())}
+                debug!("response frame: {}",frame);
+                debug!("response frame size: {}",frame.len());
+            }
         }
     }
 }

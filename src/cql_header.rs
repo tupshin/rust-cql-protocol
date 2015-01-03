@@ -70,18 +70,26 @@ impl Header {
         Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
     }
 
+    pub fn get_body_len(&self) -> u32 {
+        self.body_length.length.swap_bytes()
+    }
+
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut vec = Vec::<u8>::new();
         vec.push_all(unsafe{raw_byte_repr(self)});
         vec
     }
 
+    pub fn len(&self) -> u16 {
+        unsafe{raw_byte_repr(self).len() as u16}
+    }  
+
     pub fn frame_it<'a>(header:Header, bytes:&'a mut Vec<u8>)  -> Frame<'a> {
         debug!("header: {}", header);
-        let size = header.body_length.length as uint;
-        debug!("body size {}",size);
+        let size = header.get_body_len();
+        debug!("header's claimed body size {}",size);
         bytes.push_all(unsafe{raw_byte_repr(&header)});
-        bytes.resize(size + 9 , 0);
+        bytes.resize(size as uint + 9 , 0);
         Frame::Bytes(bytes)
     }
 }

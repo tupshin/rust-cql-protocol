@@ -28,6 +28,10 @@ impl<'b> Body<'b> {
         bytes.push_all((STARTUP_BODY[]));
         Body{bytes:bytes}
     }
+
+    pub fn len(&self) -> u16 {
+        self.bytes.len() as u16
+    }
 }
 
 

@@ -25,6 +25,13 @@ impl<'b> Frame<'b> {
         Frame::Parts(FrameParts{header:header,body:body})
     }
 
+    pub fn len(&self) -> u16 {
+        match self {
+            &Frame::Bytes(bytes) => bytes.len() as u16,
+            &Frame::Parts(parts) => parts.header.len() + parts.body.len()
+        }
+    }
+
     pub fn as_bytes<'a>(&'a self) -> Vec<u8> {
         match self{
             &Frame::Bytes(bytes) => bytes.clone(), 
@@ -37,14 +44,14 @@ impl<'b> Frame<'b> {
         }
     }
 
-    pub fn get_header<'a>(&'a self) -> &'a Header {
+    pub fn get_header<'a>(&'a self) -> Header {
         match self{
             &Frame::Bytes(ref bytes) => {
                 let header = bytes[0..9].as_ptr() as *const Header;
-                unsafe{&*header}
+                unsafe{*header}
             }
             &Frame::Parts(ref parts) => {
-                &parts.header
+                parts.header
             }
         }
     }

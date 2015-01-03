@@ -17,13 +17,24 @@ pub type CqlStringMap = Vec<u8>;
 ///for any type that implements CqlTransportTypeBuilder, it must have a build() function that converts
 ///from type T to type U, and that it is up to the implementation of each type CqlTransportType what its
 ///respective types for T and U are.
-pub trait CqlTransportTypeBuilder<T,U> {
-    fn to_cql_type(&self) -> U;
+pub trait CqlTransportTypeBuilder<NATIVET,CQLT> {
+    fn to_cql_type(&self) -> CQLT;
+}
+
+pub trait CqlTransportTypeSerializer<CQLT,NATIVET> {
+    fn to_native_type(&self) -> NATIVET;
+}
+
+impl CqlTransportTypeSerializer<Self,HashMap<String,String>> for CqlStringMap {
+    fn to_native_type(&self) -> HashMap<String,String> {
+        let map = HashMap::new();
+        map
+    }
 }
 
 ///A builder for the CqlStringMap type must take as "T" type HashMap<String,String> and
 ///produce a "U" as a CqlStringMap
-impl CqlTransportTypeBuilder<HashMap<String,String>,CqlStringMap> for HashMap<String,String> {
+impl CqlTransportTypeBuilder<Self,CqlStringMap> for HashMap<String,String> {
     fn to_cql_type(&self) -> CqlStringMap {
         let mut bytes = Vec::<u8>::new();
         match bytes.write_be_u16(self.len() as u16) { //one as short indicating one k/v in map
@@ -39,4 +50,5 @@ impl CqlTransportTypeBuilder<HashMap<String,String>,CqlStringMap> for HashMap<St
             } 
         }
     }
+
 }
