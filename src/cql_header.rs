@@ -5,7 +5,8 @@ use std::fmt;
 use std::fmt::Show;
 use std::num::Int;
 
-use raw_byte_utils::Utils;
+use raw_byte_utils::*;
+
 use cql_frame::Frame;
 
 #[repr(C, packed)]
@@ -60,19 +61,18 @@ impl fmt::Show for Length {
 }
 
 impl Header {
-
     pub fn build_startup() -> Header {
         let version:Version=Version::DEFAULT;
         let flags=Flags::NONE;
         let opcode=Opcode::STARTUP;
-        let stream=IDGen::new_id();
+        let stream:i16=IdGen::new_id();
         let length=Length{length:Int::from_be(22)};
         Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut vec = Vec::<u8>::new();
-        vec.push_all(unsafe{Utils::raw_byte_repr(self)});
+        vec.push_all(unsafe{raw_byte_repr(self)});
         vec
     }
 
@@ -80,21 +80,21 @@ impl Header {
         debug!("header: {}", header);
         let size = header.body_length.length as uint;
         debug!("body size {}",size);
-        bytes.push_all(unsafe{Utils::raw_byte_repr(&header)});
+        bytes.push_all(unsafe{raw_byte_repr(&header)});
         bytes.resize(size + 9 , 0);
         Frame::Bytes(bytes)
     }
 }
 
-pub trait IDGen {
+pub trait IdGen {
   /// Dumb approach to get increasing and unique ids
-  fn new_id() -> i16;
+  fn new_id() -> Self;
 }
 
 static mut STREAM_ID : i16 = 0;
 
-impl IDGen for StreamId {
-  fn new_id() -> i16 {unsafe{
+impl IdGen for i16 {
+  fn new_id() -> Self {unsafe{
     STREAM_ID +=1;
     STREAM_ID
   }}

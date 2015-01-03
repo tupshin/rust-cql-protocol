@@ -14,3 +14,6 @@ path="src/bin/example.rs"
 
 [lib]
 name = "cql"
+
+[dependencies.lazy_static]
+git = "https://github.com/Kimundi/lazy-static.rs/"

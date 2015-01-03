@@ -13,6 +13,6 @@ pub mod cql_frame;
 pub mod cql_body;
 pub mod cql_header;
 pub mod cql_stream;
-//~ pub mod cql_transport_types;
+pub mod cql_transport_types;
 pub mod raw_byte_utils;
 
