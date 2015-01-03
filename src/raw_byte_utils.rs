@@ -13,3 +13,4 @@ impl<'b> Utils for &'b [u8] {
         })
     }
 }
+

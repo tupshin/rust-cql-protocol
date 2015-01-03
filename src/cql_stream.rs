@@ -5,8 +5,8 @@ use std::io::IoResult;
 use std::io::TcpStream;
 use std::io::net::ip::ToSocketAddr;
 
-use std::sync::{Once, ONCE_INIT};
-static INIT: Once = ONCE_INIT;
+//~ use std::sync::{Once, ONCE_INIT};
+//~ static INIT: Once = ONCE_INIT;
 
 static mut HEADER_RESPONSE_BUF: [u8;9] =  [0u8,..9];
 
@@ -14,17 +14,18 @@ pub trait CqlStream {
     //fn connect_cql(&mut self, addr: &str) -> IoResult<&CqlStream>;
    // fn startup(&mut self) -> IoResult<()>;
     fn write_frame(&mut self,frame:Frame) -> IoResult<()>;
-    fn get_next_frame(&mut self) -> IoResult<&Frame>;
+    fn get_next_frame<'a>(&'a mut self, bytes:&'a mut Vec<u8>) -> IoResult<Frame<'a>>;
     fn match_len<'a>(&'a mut self, mut frame:Frame<'a>) -> IoResult<Frame<'a>>;
    // fn query(&mut self, query:String) ->  IoResult<()>;
 }
 
 impl CqlStream for TcpStream {
     fn write_frame(&mut self,frame:Frame) -> IoResult<()> {
+        debug!("writing frame of length: {}", frame.as_bytes().len());
        self.write(frame.as_bytes().as_slice())
     }
 
-    fn get_next_frame<'a>(&'a mut self) -> IoResult<&'a Frame> {unsafe{
+    fn get_next_frame<'a>(&'a mut self, bytes:&'a mut Vec<u8>) -> IoResult<Frame<'a>> {unsafe{
         match self.read(HEADER_RESPONSE_BUF.as_mut_slice()) {
             Err(err) => panic!("failed to read frame: {}", err),
             Ok(_) => {
@@ -32,16 +33,15 @@ impl CqlStream for TcpStream {
                 let response = *response;
                 //construct a Frame presized to hold all of the header (which has already been written) plus
                 //room for all the bytes based on the expected body size
-                let frame:Frame = Header::frame_it(response);
-        
+                let frame:Frame = Header::frame_it(response, bytes);
                 //get a reference to a mutable slice of just the body bytes of the frame (everything after byte 9)
-                panic!();
- //               self.match_len(frame)
+                //panic!();
+                self.match_len(frame)
             }
         }
     }}
 
-    fn match_len<'a>(&'a mut self, mut frame:Frame<'a>) -> IoResult<Frame<'a>> {
+    fn match_len<'a>(&'a mut self, frame:Frame<'a>) -> IoResult<Frame<'a>> {
         debug!("match_len says: {}", frame.get_header().body_length);
         let len = frame.get_header().body_length.length as uint;
         match len {

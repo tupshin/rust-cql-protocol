@@ -1,7 +1,8 @@
-#![feature(phase)]
 #[phase(plugin, link)]
 extern crate log;
 
+use std::fmt;
+use std::fmt::Show;
 use std::num::Int;
 
 use raw_byte_utils::Utils;
@@ -49,8 +50,14 @@ pub enum Opcode {
 }
 
 #[repr(C, packed)]
-#[deriving(Copy,Show)]
+#[deriving(Copy)]
 pub struct Length {pub length:u32}
+
+impl fmt::Show for Length {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", Int::from_be(self.length))
+  }
+}
 
 impl Header {
 
@@ -65,18 +72,17 @@ impl Header {
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut vec = Vec::<u8>::new();
-        vec.push_all(unsafe{Utils::raw_byte_repr(&self)});
+        vec.push_all(unsafe{Utils::raw_byte_repr(self)});
         vec
     }
 
-    pub fn frame_it<'a>(header:Header)  -> Frame<'a> {
+    pub fn frame_it<'a>(header:Header, bytes:&'a mut Vec<u8>)  -> Frame<'a> {
+        debug!("header: {}", header);
         let size = header.body_length.length as uint;
         debug!("body size {}",size);
-        let mut bytes:Vec<u8> = Vec::with_capacity(size);
         bytes.push_all(unsafe{Utils::raw_byte_repr(&header)});
         bytes.resize(size + 9 , 0);
-        panic!();
-        //Frame::Bytes(&bytes.clone())
+        Frame::Bytes(bytes)
     }
 }
 
