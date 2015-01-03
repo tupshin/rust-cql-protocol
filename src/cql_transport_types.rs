@@ -1,18 +1,8 @@
 use std::collections::HashMap;
-
-//~ pub fn hashmap2cqlmap(map:HashMap<&str,&str>) -> Vec<u8> {
-    //~ let mut bytes = Vec::<u8>::new();
-    //~ bytes.write_be_u16(map.len() as u16); //one as short indicating one k/v in map
-    //~ for (key,value) in map.iter() {
-        //~ bytes.write_be_u16(key.len() as u16); //one short indicating length of k
-    //~ bytes.write_str(key[]);
-    //~ bytes.write_be_u16(value.len() as u16); //one short indicating length of v
-    //~ bytes.write_str(value[]); 
-    //~ }
-    //~ bytes
-//~ }
+use  std::str::from_utf8;
 
 pub type CqlStringMap = Vec<u8>;
+
  
 ///for any type that implements CqlTransportTypeBuilder, it must have a build() function that converts
 ///from type T to type U, and that it is up to the implementation of each type CqlTransportType what its
@@ -50,5 +40,27 @@ impl CqlTransportTypeBuilder<Self,CqlStringMap> for HashMap<String,String> {
             } 
         }
     }
+}
 
+pub type CqlLongString = Vec<u8>;
+
+impl CqlTransportTypeSerializer<Self,String> for CqlLongString {
+    fn to_native_type(&self) -> String {
+        let (_,bytes) = self.split_at(4); //discarding the size for now
+        match from_utf8(bytes) {
+            Err(err) => panic!("couldn't extract a String from a CqlLongString: {}",err),
+            Ok(value) => value.to_string()
+        }
+    }
+}
+
+///A builder for the CqlStringMap type must take as "T" type HashMap<String,String> and
+///produce a "U" as a CqlStringMap
+impl CqlTransportTypeBuilder<Self,CqlLongString> for String {
+    fn to_cql_type(&self) -> CqlLongString {
+        let mut bytes = Vec::<u8>::new();
+        bytes.write_be_u32(self.len() as u32).unwrap();
+        bytes.write_str(self[]).unwrap();
+        bytes
+    }
 }

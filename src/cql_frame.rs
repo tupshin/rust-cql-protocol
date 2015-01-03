@@ -1,17 +1,18 @@
 use cql_header::Header;
 use cql_body::Body;
 use cql_stream::CqlStream;
+use cql_body::BodyBuilder;
 
 use std::io::IoResult;
 
 
-#[deriving(Copy,Show)]
+#[deriving(Show)]
 pub enum Frame<'a> {
     Bytes(&'a Vec<u8>),
     Parts(FrameParts<'a>)
 }
 
-#[deriving(Copy,Show)]
+#[deriving(Show)]
 pub struct FrameParts<'a> {
     header:Header,
     body:Body<'a>
@@ -19,26 +20,33 @@ pub struct FrameParts<'a> {
 
 impl<'b> Frame<'b> {
 
-    pub fn build_startup<'a>(bytes:&'a mut Vec<u8>) ->  Frame<'a> {
+    pub fn build_startup<'a>(bytes:Vec<u8>) ->  Frame<'a> {
         let header = Header::build_startup();
-        let body = Body::build_startup(bytes);
+        
+        let body:Body = BodyBuilder::build_startup(bytes);
         Frame::Parts(FrameParts{header:header,body:body})
     }
 
-    pub fn len(&self) -> u16 {
+    pub fn build_query<'a>(bytes:Vec<u8>, query:String) ->  Frame<'a> {
+        let body:Body = BodyBuilder::build_query(bytes,query);
+        let header = Header::build_query(body.len() as u32);
+        Frame::Parts(FrameParts{header:header,body:body})
+    }
+
+    pub fn len(&self) -> u32 {
         match self {
-            &Frame::Bytes(bytes) => bytes.len() as u16,
-            &Frame::Parts(parts) => parts.header.len() + parts.body.len()
+            &Frame::Bytes(bytes) => bytes.len() as u32,
+            &Frame::Parts(ref parts) => parts.header.len() as u32 + parts.body.len() as u32
         }
     }
 
     pub fn as_bytes<'a>(&'a self) -> Vec<u8> {
         match self{
             &Frame::Bytes(bytes) => bytes.clone(), 
-            &Frame::Parts(parts) => {
+            &Frame::Parts(ref parts) => {
                 let mut bytes = Vec::<u8>::new();
                 bytes.push_all(parts.header.to_bytes()[]);
-                bytes.push_all(parts.body.bytes[]);
+                bytes.push_all(parts.body[]);
                 bytes
             }
         }

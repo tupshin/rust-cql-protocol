@@ -17,20 +17,30 @@ lazy_static! {
 }
 
 #[repr(C, packed)]
-#[deriving(Copy,Show)]
-pub struct Body<'a> {
-    pub bytes:&'a Vec<u8>
+pub type Body<'b> = Vec<u8>;
+
+pub trait BodyBuilder {
+    fn build_startup(bytes:Vec<u8>) -> Self;
+    fn build_query(bytes:Vec<u8>, query:String) -> Self;
+    fn len(&self) -> u32;
 }
 
-impl<'b> Body<'b> {
-    pub fn build_startup(bytes:&'b mut Vec<u8>) -> Body<'b>{
+
+impl<'b> BodyBuilder for Body<'b> {
+    fn build_startup(mut bytes:Vec<u8>) -> Self {
         debug!("body bytes {}: ", bytes[]);
-        bytes.push_all((STARTUP_BODY[]));
-        Body{bytes:bytes}
+        bytes.push_all(STARTUP_BODY[]);
+        bytes
     }
 
-    pub fn len(&self) -> u16 {
-        self.bytes.len() as u16
+    fn build_query(bytes:Vec<u8>, query:String) -> Self {
+        debug!("body bytes {}: ", bytes[]);
+        let cql_string = query.to_cql_type();
+       cql_string
+    }
+
+    fn len(&self) -> u32 {
+        self.len() as u32
     }
 }
 

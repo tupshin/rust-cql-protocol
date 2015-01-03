@@ -61,12 +61,21 @@ impl fmt::Show for Length {
 }
 
 impl Header {
-    pub fn build_startup() -> Header {
+    pub fn build_startup() -> Self {
         let version:Version=Version::DEFAULT;
         let flags=Flags::NONE;
         let opcode=Opcode::STARTUP;
         let stream:i16=IdGen::new_id();
         let length=Length{length:Int::from_be(22)};
+        Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
+    }
+
+    pub fn build_query(body_length:u32) -> Self {
+        let version:Version=Version::DEFAULT;
+        let flags=Flags::NONE;
+        let opcode=Opcode::QUERY;
+        let stream:i16=unsafe{STREAM_ID};
+        let length=Length{length:Int::from_be(body_length)};
         Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
     }
 
