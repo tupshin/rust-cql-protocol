@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use  std::str::from_utf8;
 
 pub type CqlStringMap = Vec<u8>;
-
  
 ///for any type that implements CqlTransportTypeBuilder, it must have a build() function that converts
 ///from type T to type U, and that it is up to the implementation of each type CqlTransportType what its

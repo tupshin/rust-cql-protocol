@@ -7,8 +7,6 @@ use std::num::Int;
 
 use raw_byte_utils::*;
 
-use cql_frame::Frame;
-
 #[repr(C, packed)]
 #[deriving(Show,Copy)]
 pub struct Header {
@@ -92,15 +90,6 @@ impl Header {
     pub fn len(&self) -> u16 {
         unsafe{raw_byte_repr(self).len() as u16}
     }  
-
-    pub fn frame_it<'a>(header:Header, mut bytes:Vec<u8>)  -> Frame<'a> {
-        debug!("header: {}", header);
-        let size = header.get_body_len();
-        debug!("header's claimed body size {}",size);
-        bytes.push_all(unsafe{raw_byte_repr(&header)});
-        bytes.resize(size as uint + 9 , 0);
-        Frame::Bytes(bytes.clone())
-    }
 }
 
 pub trait IdGen {
