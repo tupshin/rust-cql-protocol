@@ -13,7 +13,7 @@ static mut HEADER_RESPONSE_BUF: [u8;9] =  [0u8,..9];
 
 pub trait CqlStream {
     fn write_frame(&mut self,frame:Frame) -> IoResult<()>;
-    fn get_next_frame<'a>(&'a mut self, bytes:&'a mut Vec<u8>) -> IoResult<Frame<'a>>;
+    fn get_next_frame<'a>(&'a mut self, bytes:Vec<u8>) -> IoResult<Frame<'a>>;
     fn match_len<'a>(&'a mut self, mut frame:Frame<'a>) -> IoResult<Frame<'a>>;
    // fn query(&mut self, query:String) ->  IoResult<()>;
 }
@@ -24,7 +24,7 @@ impl CqlStream for TcpStream {
        self.write(frame.as_bytes().as_slice())
     }
 
-    fn get_next_frame<'a>(&'a mut self, bytes:&'a mut Vec<u8>) -> IoResult<Frame<'a>> {unsafe{
+    fn get_next_frame<'a>(&'a mut self, bytes: Vec<u8>) -> IoResult<Frame<'a>> {unsafe{
         match self.read(HEADER_RESPONSE_BUF.as_mut_slice()) {
             Err(err) => panic!("failed to read frame: {}", err),
             Ok(_) => {

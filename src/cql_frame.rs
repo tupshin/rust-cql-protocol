@@ -8,7 +8,7 @@ use std::io::IoResult;
 
 #[deriving(Show)]
 pub enum Frame<'a> {
-    Bytes(&'a Vec<u8>),
+    Bytes(Vec<u8>),
     Parts(FrameParts<'a>)
 }
 
@@ -35,14 +35,14 @@ impl<'b> Frame<'b> {
 
     pub fn len(&self) -> u32 {
         match self {
-            &Frame::Bytes(bytes) => bytes.len() as u32,
+            &Frame::Bytes(ref bytes) => bytes.len() as u32,
             &Frame::Parts(ref parts) => parts.header.len() as u32 + parts.body.len() as u32
         }
     }
 
     pub fn as_bytes<'a>(&'a self) -> Vec<u8> {
         match self{
-            &Frame::Bytes(bytes) => bytes.clone(), 
+            &Frame::Bytes(ref bytes) => bytes.clone(), 
             &Frame::Parts(ref parts) => {
                 let mut bytes = Vec::<u8>::new();
                 bytes.push_all(parts.header.to_bytes()[]);

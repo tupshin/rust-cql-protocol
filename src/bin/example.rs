@@ -24,7 +24,7 @@ pub fn main() {
 
 fn startup(stream:&mut CqlStream) {
     let outbound_body_bytes = Vec::new();
-    let response_bytes = &mut Vec::new();
+    let response_bytes = Vec::new();
     let frame = Frame::build_startup(outbound_body_bytes);
     debug!("startup frame {}",frame);
     match stream.write_frame(frame) {
@@ -41,7 +41,7 @@ fn startup(stream:&mut CqlStream) {
 
 fn query(stream:&mut CqlStream, query:String) {
     let outbound_body_bytes = Vec::<u8>::new();
-    let response_bytes = &mut Vec::<u8>::new();
+    let response_bytes = Vec::<u8>::new();
     let frame = Frame::build_query(outbound_body_bytes, query);
     debug!("query frame {}",frame);
     match stream.write_frame(frame) {

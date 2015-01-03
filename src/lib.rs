@@ -7,7 +7,6 @@ extern crate serialize;
 
 pub use cql_frame::*;
 pub use cql_stream::*;
-pub use cql_header::*;
 
 pub mod cql_frame;
 pub mod cql_body;
