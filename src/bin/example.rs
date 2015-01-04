@@ -7,6 +7,7 @@ use std::io::TcpStream;
 
 use cql::CqlStream;
 use cql::Frame;
+use cql::Opcode;
 
 
 pub fn main() {
@@ -49,8 +50,14 @@ fn query(stream:&mut CqlStream, query:String) {
         Ok(_) => match stream.get_next_frame(response_bytes) {
             Err(err) => {panic!(err)},
             Ok(frame) => {
-                info!("response frame: {}",frame);
-                info!("response frame size: {}",frame.len());
+                match frame.get_opcode() {
+                    Opcode::ERROR => {
+                        info!("response frame: {}",frame);
+                        info!("response frame size: {}",frame.len());
+                        
+                    },
+                    _ => panic!("unsupported opcode {}",frame.get_opcode())
+                }
             }
         }
     }

@@ -5,6 +5,8 @@ use cql_body::BodyBuilder;
 
 use std::io::IoResult;
 
+pub use cql_header::Opcode;
+
 
 #[deriving(Show)]
 pub enum Frame<'a> {
@@ -50,6 +52,10 @@ impl<'b> Frame<'b> {
                 bytes
             }
         }
+    }
+
+    pub fn get_opcode(&self) -> Opcode {
+        self.get_header().opcode
     }
 
     pub fn get_header<'a>(&'a self) -> Header {
