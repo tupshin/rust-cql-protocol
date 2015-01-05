@@ -5,6 +5,7 @@ use std::fmt;
 use std::fmt::Show;
 use std::num::Int;
 
+use cql_transport_types::CqlLongString;
 use raw_byte_utils::*;
 
 #[repr(C, packed)]
@@ -25,7 +26,8 @@ pub enum Version {DEFAULT=0x03}
 pub enum Flags {NONE=0x00,COMPRESSION=0x01,TRACING=0x02,ALL=0x03}
 
 #[repr(u16, packed)]
-pub type StreamId = i16;
+#[deriving(Copy,Show)]
+pub struct StreamId{stream_id:i16}
 
 #[repr(u8, packed)]
 #[deriving(Copy,Show)] #[allow(non_camel_case_types)]
@@ -65,14 +67,14 @@ impl Header {
         let opcode=Opcode::STARTUP;
         let stream:i16=IdGen::new_id();
         let length=Length{length:Int::from_be(22)};
-        Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
+        Header{version:version,flags:flags,opcode:opcode,stream:StreamId{stream_id:stream},body_length:length}
     }
 
     pub fn build_query(body_length:u32) -> Self {
-        let version:Version=Version::DEFAULT;
+        let version=Version::DEFAULT;
         let flags=Flags::NONE;
         let opcode=Opcode::QUERY;
-        let stream:i16=unsafe{STREAM_ID};
+        let stream=StreamId{stream_id:unsafe{STREAM_ID}};
         let length=Length{length:Int::from_be(body_length)};
         Header{version:version,flags:flags,opcode:opcode,stream:stream,body_length:length}
     }

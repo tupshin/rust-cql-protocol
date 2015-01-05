@@ -99,7 +99,7 @@ impl<'b> Frame<'b> {
                 let (err_code_slice,message_slice) = self.get_body().bytes.split_at(4);
                 let message_slice = message_slice.as_ptr() as *const CqlLongString;
                 let ref message_slice:CqlLongString = *message_slice;
-                CqlError{error_code:TransportErrorCode::UNAVAILABLE_EXCEPTION,error_msg:message_slice.to_string()}
+                CqlError{error_code:TransportErrorCode::UNAVAILABLE_EXCEPTION,error_msg:message_slice.bytes.to_string()}
             },
             _ => panic!("get_error called on a non-error frame")
         }

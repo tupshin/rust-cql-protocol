@@ -33,10 +33,10 @@ pub enum ResultType {
 
 #[deriving(Copy,Show)]
 pub struct VoidResult;
-pub type RowsResult = Vec<u8>;
-pub type SetKeyspaceResult = Vec<u8>;
-pub type PreparedResult = Vec<u8>;
-pub type SchemaChangeResult = Vec<u8>;
+pub struct RowsResult {bytes:Vec<u8>}
+pub struct SetKeyspaceResult {bytes:Vec<u8>}
+pub struct PreparedResult {bytes:Vec<u8>}
+pub struct SchemaChangeResult {bytes:Vec<u8>}
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
@@ -104,11 +104,11 @@ impl CqlTransportTypeBuilder<Self,CqlStringMap> for HashMap<String,String> {
     }
 }
 
-pub type CqlLongString = Vec<u8>;
+pub struct CqlLongString{pub bytes:Vec<u8>}
 
 impl CqlTransportTypeSerializer<Self,String> for CqlLongString {
     fn to_native_type(&self) -> String {
-        let (_,bytes) = self.split_at(4); //discarding the size for now
+        let (_,bytes) = self.bytes.split_at(4); //discarding the size for now
         match from_utf8(bytes) {
             Err(err) => panic!("couldn't extract a String from a CqlLongString: {}",err),
             Ok(value) => value.to_string()
@@ -123,6 +123,6 @@ impl CqlTransportTypeBuilder<Self,CqlLongString> for String {
         let mut bytes = Vec::<u8>::new();
         bytes.write_be_u32(self.len() as u32).unwrap();
         bytes.write_str(self[]).unwrap();
-        bytes
+        CqlLongString{bytes:bytes}
     }
 }

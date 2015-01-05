@@ -40,7 +40,7 @@ impl<'b> BodyBuilder for Body<'b> {
     }
 
     fn build_query(mut bytes:Vec<u8>, query:String, consistency:Consistency, flags:QueryFlags) -> Self {
-        bytes.push_all(query.to_cql_type()[]);
+        bytes.push_all(query.to_cql_type().bytes[]);
         bytes.write_be_u16(consistency as u16); //FIXME adjustable CL
         bytes.write_u8(QueryFlags::NONE as u8); //FIXME adjustable FLAGS
         debug!("query bytes: {}", bytes[]);
