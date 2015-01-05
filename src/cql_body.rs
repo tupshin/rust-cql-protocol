@@ -8,11 +8,12 @@ use cql_transport_types::CqlTransportTypeBuilder;
 use cql_transport_types::Consistency;
 use cql_transport_types::QueryFlags;
 use cql_transport_types::CqlResult;
+use cql_transport_types::CqlStringMap;
 
 
 
 lazy_static! {
-    static ref STARTUP_BODY:Vec<u8> = {
+    static ref STARTUP_BODY:CqlStringMap = {
         let mut map:HashMap<String,String> = HashMap::<String,String>::new();
         map.insert("CQL_VERSION".to_string(),"3.0.0".to_string());
         map.to_cql_type()
@@ -34,7 +35,7 @@ pub trait BodyBuilder {
 impl<'b> BodyBuilder for Body<'b> {
     fn build_startup(mut bytes:Vec<u8>) -> Self {
         debug!("body bytes {}: ", bytes[]);
-        bytes.push_all(STARTUP_BODY[]);
+        bytes.push_all(STARTUP_BODY.bytes[]);
         Body{bytes:bytes}
     }
 

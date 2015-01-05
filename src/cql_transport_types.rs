@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use  std::str::from_utf8;
 
-pub type CqlStringMap = Vec<u8>;
+pub struct CqlStringMap {pub bytes:Vec<u8>}
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
@@ -31,6 +31,7 @@ pub enum ResultType {
     SCHEMA_CHANGE=0x0005
 }
 
+#[deriving(Copy,Show)]
 pub struct VoidResult;
 pub type RowsResult = Vec<u8>;
 pub type SetKeyspaceResult = Vec<u8>;
@@ -97,7 +98,7 @@ impl CqlTransportTypeBuilder<Self,CqlStringMap> for HashMap<String,String> {
                     bytes.write_be_u16(value.len() as u16).unwrap(); //one short indicating length of v
                     bytes.write_str(value[]).unwrap();
                 }
-                bytes
+                CqlStringMap{bytes:bytes}
             }
         }
     }
