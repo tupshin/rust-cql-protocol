@@ -2,7 +2,69 @@ use std::collections::HashMap;
 use  std::str::from_utf8;
 
 pub type CqlStringMap = Vec<u8>;
- 
+
+#[repr(C,packed)]
+#[allow(non_camel_case_types)]
+#[deriving(Copy,Show)]
+pub enum Consistency {
+    ANY=0x0000,
+    ONE=0x0001,
+    TWO=0x0002,
+    THREE=0x0003,
+    QUORUM=0x0004,
+    ALL=0x0005,
+    LOCAL_QUORUM=0x0006,
+    EACH_QUORUM=0x0007,
+    SERIAL=0x0008,
+    LOCAL_SERIAL=0x0009,
+    LOCAL_ONE=0x000A
+}
+
+#[repr(C,packed)]
+#[allow(non_camel_case_types)]
+#[deriving(Copy,Show)]
+pub enum ResultType {
+    VOID=0x0001,
+    ROWS=0x0002,
+    SET_KEYSPACE=0x0003,
+    PREPARED=0x0004,
+    SCHEMA_CHANGE=0x0005
+}
+
+pub struct VoidResult;
+pub type RowsResult = Vec<u8>;
+pub type SetKeyspaceResult = Vec<u8>;
+pub type PreparedResult = Vec<u8>;
+pub type SchemaChangeResult = Vec<u8>;
+
+#[repr(C,packed)]
+#[allow(non_camel_case_types)]
+pub enum CqlResult {
+    VOID(VoidResult),
+    ROWS(RowsResult),
+    SET_KEYSPACE(SetKeyspaceResult),
+    PREPARED(PreparedResult),
+    SCHEMA_CHANGE(SchemaChangeResult)
+}
+
+
+
+
+#[repr(C,packed)]
+#[allow(non_camel_case_types)]
+#[deriving(Copy,Show)]
+pub enum QueryFlags {
+    NONE=0x00,
+    VALUES=0x01,
+    SKIP_METADATA=0x02,
+    PAGE_SIZE=0x04,
+    WITH_PAGING_STATE=0x08,
+    WITH_SERIAL_CONSISTENCY=0x10,
+    WITH_DEFAULT_TIMESTAMP=0x20,
+    WITH_NAMES_FOR_VALUES=0x40
+}
+
+pub type Query = CqlLongString; 
 ///for any type that implements CqlTransportTypeBuilder, it must have a build() function that converts
 ///from type T to type U, and that it is up to the implementation of each type CqlTransportType what its
 ///respective types for T and U are.
@@ -36,7 +98,7 @@ impl CqlTransportTypeBuilder<Self,CqlStringMap> for HashMap<String,String> {
                     bytes.write_str(value[]).unwrap();
                 }
                 bytes
-            } 
+            }
         }
     }
 }

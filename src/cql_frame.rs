@@ -2,9 +2,19 @@ use cql_header::Header;
 use cql_body::Body;
 use cql_stream::CqlStream;
 use cql_body::BodyBuilder;
+use cql_error::CqlError;
+use cql_error::TransportErrorCode;
+use cql_transport_types::CqlLongString;
+use cql_transport_types::Consistency;
+use cql_transport_types::QueryFlags;
+use cql_transport_types::ResultType;
+use cql_transport_types::CqlResult;
+
+use std::str::from_utf8;
 
 use std::io::IoResult;
-
+use std::num::Int;
+use std::mem;
 pub use cql_header::Opcode;
 
 
@@ -29,8 +39,8 @@ impl<'b> Frame<'b> {
         Frame::Parts(FrameParts{header:header,body:body})
     }
 
-    pub fn build_query<'a>(bytes:Vec<u8>, query:String) ->  Frame<'a> {
-        let body:Body = BodyBuilder::build_query(bytes,query);
+    pub fn build_query<'a>(bytes:Vec<u8>, query:String, consistency:Consistency, flags:QueryFlags) ->  Frame<'a> {
+        let body:Body = BodyBuilder::build_query(bytes,query, consistency, flags);
         let header = Header::build_query(body.len() as u32);
         Frame::Parts(FrameParts{header:header,body:body})
     }
@@ -48,7 +58,7 @@ impl<'b> Frame<'b> {
             &Frame::Parts(ref parts) => {
                 let mut bytes = Vec::<u8>::new();
                 bytes.push_all(parts.header.to_bytes()[]);
-                bytes.push_all(parts.body[]);
+                bytes.push_all(parts.body.bytes[]);
                 bytes
             }
         }
@@ -67,6 +77,45 @@ impl<'b> Frame<'b> {
             &Frame::Parts(ref parts) => {
                 parts.header
             }
+        }
+    }
+
+    pub fn get_body<'a>(&'a self) -> &Body {
+        match self{
+            &Frame::Bytes(ref bytes) => {
+                let body = bytes[10..].as_ptr() as *const Body;
+                unsafe{&*body}
+            }
+            &Frame::Parts(ref parts) => {
+                &parts.body
+            }
+        }
+    }
+
+    pub fn get_error(&self) -> CqlError {
+        let body = self.get_body();
+        match self.get_header().opcode {
+            Opcode::ERROR => unsafe{
+                let (err_code_slice,message_slice) = self.get_body().bytes.split_at(4);
+                let message_slice = message_slice.as_ptr() as *const CqlLongString;
+                let ref message_slice:CqlLongString = *message_slice;
+                CqlError{error_code:TransportErrorCode::UNAVAILABLE_EXCEPTION,error_msg:message_slice.to_string()}
+            },
+            _ => panic!("get_error called on a non-error frame")
+        }
+    }
+
+    pub fn get_results(&self) -> CqlError {
+        let body = self.get_body();
+        match self.get_header().opcode {
+            Opcode::RESULT => match body.get_results() {
+                CqlResult::VOID(_) => {panic!()},
+                CqlResult::ROWS(rows_result) => {panic!()},
+                CqlResult::SET_KEYSPACE(set_keyspace_result) => {panic!()},
+                CqlResult::PREPARED(prepared_result) => {panic!()},
+                CqlResult::SCHEMA_CHANGE(schema_change) => {panic!()}
+            },
+            _ => panic!("get_error called on a non-error frame")
         }
     }
 

@@ -24,7 +24,7 @@ pub trait CqlStream {
 impl CqlStream for TcpStream {
     fn write_frame(&mut self,frame:Frame) -> IoResult<()> {
         debug!("writing frame of length: {}", frame.as_bytes().len());
-       self.write(frame.as_bytes().as_slice())
+        self.write(frame.as_bytes().as_slice())
     }
 
     fn get_next_frame<'a>(&'a mut self, bytes: Vec<u8>) -> IoResult<Frame<'a>> {unsafe{
@@ -49,7 +49,6 @@ impl CqlStream for TcpStream {
     fn build_inbound_frame<'a>(&mut self, header:Header, mut bytes:Vec<u8>)  -> Frame<'a> {
         debug!("header: {}", header);
         let size = header.get_body_len();
-        debug!("header's claimed body size {}",size);
         bytes.push_all(unsafe{raw_byte_repr(&header)});
         bytes.resize(size as uint + 9 , 0);
         match size {
@@ -76,20 +75,14 @@ impl CqlStream for TcpStream {
                     })
             },
             9 => {
-                debug!("header size frame: {}",len);
                 Ok(frame)
             },
             _ => {
-                debug!("got some body: {}",len);
-                //panic!("frame size: {}", frame.len());
-
                 let mut bytes = frame.as_bytes();
-                debug!("bytes buf size is {}",bytes.len());
                 let (_,body) = bytes.split_at_mut(9);
-                debug!("body buf size is {}",body.len());
                 match self.read(body) {
                     Err(err) => panic!("failed to read body: {}",err),
-                    Ok(_) => {debug!("why you no get here");Ok(frame)}
+                    Ok(_) => Ok(frame)
                 }
             }
         }
