@@ -4,8 +4,8 @@ extern crate lazy_static;
 use std::collections::HashMap;
 
 use cql_transport_types::CqlTransportTypeBuilder;
-use cql_transport_types::Consistency;
-use cql_transport_types::QueryFlags;
+use cql_transport_types::consistency::Consistency;
+use cql_transport_types::query::QueryFlags;
 use cql_transport_types::CqlResult;
 use cql_transport_types::CqlStringMap;
 

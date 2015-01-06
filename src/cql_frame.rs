@@ -5,7 +5,7 @@ use cql_body::BodyBuilder;
 use cql_error::CqlError;
 use cql_error::TransportErrorCode;
 use cql_transport_types::CqlLongString;
-use cql_transport_types::Consistency;
+use cql_transport_types::consistency::Consistency;
 use cql_transport_types::QueryFlags;
 use cql_transport_types::CqlResult;
 
@@ -111,7 +111,7 @@ impl<'b> Frame<'b> {
                 CqlResult::PREPARED(prepared_result) => {panic!()},
                 CqlResult::SCHEMA_CHANGE(schema_change) => {panic!()}
             },
-            _ => panic!("get_error called on a non-error frame")
+            _ => panic!("results called on a non result frame")
         }
     }
 
