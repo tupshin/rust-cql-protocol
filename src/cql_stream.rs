@@ -11,7 +11,7 @@ use std::io::IoErrorKind;
 //~ use std::sync::{Once, ONCE_INIT};
 //~ static INIT: Once = ONCE_INIT;
 
-static mut HEADER_RESPONSE_BUF: [u8;9] =  [0u8,..9];
+static mut HEADER_RESPONSE_BUF: [u8;9] =  [0u8;9];
 
 pub trait CqlStream {
     fn write_frame(&mut self,frame:Frame) -> IoResult<()>;

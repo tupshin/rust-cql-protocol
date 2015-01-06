@@ -5,7 +5,7 @@ pub struct CqlStringMap {pub bytes:Vec<u8>}
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum Consistency {
     ANY=0x0000,
     ONE=0x0001,
@@ -22,7 +22,7 @@ pub enum Consistency {
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum ResultType {
     VOID=0x0001,
     ROWS=0x0002,
@@ -31,12 +31,12 @@ pub enum ResultType {
     SCHEMA_CHANGE=0x0005
 }
 
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub struct VoidResult;
-pub struct RowsResult {bytes:Vec<u8>}
-pub struct SetKeyspaceResult {bytes:Vec<u8>}
-pub struct PreparedResult {bytes:Vec<u8>}
-pub struct SchemaChangeResult {bytes:Vec<u8>}
+pub struct RowsResult {pub bytes:Vec<u8>}
+pub struct SetKeyspaceResult {pub bytes:Vec<u8>}
+pub struct PreparedResult {pub bytes:Vec<u8>}
+pub struct SchemaChangeResult {pub bytes:Vec<u8>}
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
@@ -53,7 +53,7 @@ pub enum CqlResult {
 
 #[repr(C,packed)]
 #[allow(non_camel_case_types)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum QueryFlags {
     NONE=0x00,
     VALUES=0x01,

@@ -1,5 +1,5 @@
 #[allow(non_camel_case_types)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum TransportErrorCode {
     SERVER_ERROR=0x0000,
     PROTOCOL_ERROR=0x000A,
@@ -18,7 +18,13 @@ pub enum TransportErrorCode {
     UNPREPARED=0x2500,
 }
 
-#[deriving(Show)]
+impl TransportErrorCode {
+    //~ pub fn build(val:i32) {
+        //~ let foo=0x0000;
+    //~ }
+}
+
+#[derive(Show)]
 pub struct CqlError {
     pub error_code: TransportErrorCode,
     pub error_msg: String

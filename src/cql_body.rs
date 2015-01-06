@@ -2,7 +2,6 @@
 extern crate lazy_static;
 
 use std::collections::HashMap;
-use raw_byte_utils::*;
 
 use cql_transport_types::CqlTransportTypeBuilder;
 use cql_transport_types::Consistency;
@@ -21,7 +20,7 @@ lazy_static! {
 }
 
 #[repr(C, packed)]
-#[deriving(Show)]
+#[derive(Show)]
 pub struct Body<'b> {pub bytes:Vec<u8>}
 
 pub trait BodyBuilder {
@@ -41,8 +40,8 @@ impl<'b> BodyBuilder for Body<'b> {
 
     fn build_query(mut bytes:Vec<u8>, query:String, consistency:Consistency, flags:QueryFlags) -> Self {
         bytes.push_all(query.to_cql_type().bytes[]);
-        bytes.write_be_u16(consistency as u16); //FIXME adjustable CL
-        bytes.write_u8(QueryFlags::NONE as u8); //FIXME adjustable FLAGS
+        bytes.write_be_u16(consistency as u16).unwrap();
+        bytes.write_u8(flags as u8).unwrap();
         debug!("query bytes: {}", bytes[]);
         debug!("query bytes len: {}", bytes.len());
         Body{bytes:bytes}

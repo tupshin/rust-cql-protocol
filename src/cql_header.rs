@@ -5,11 +5,10 @@ use std::fmt;
 use std::fmt::Show;
 use std::num::Int;
 
-use cql_transport_types::CqlLongString;
 use raw_byte_utils::*;
 
 #[repr(C, packed)]
-#[deriving(Show,Copy)]
+#[derive(Show,Copy)]
 pub struct Header {
     pub version:Version,
     pub flags:Flags,
@@ -18,19 +17,19 @@ pub struct Header {
     pub body_length:Length
 }
 
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum Version {DEFAULT=0x03}
 
 #[repr(u8, packed)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub enum Flags {NONE=0x00,COMPRESSION=0x01,TRACING=0x02,ALL=0x03}
 
 #[repr(u16, packed)]
-#[deriving(Copy,Show)]
+#[derive(Copy,Show)]
 pub struct StreamId{stream_id:i16}
 
 #[repr(u8, packed)]
-#[deriving(Copy,Show)] #[allow(non_camel_case_types)]
+#[derive(Copy,Show)] #[allow(non_camel_case_types)]
 pub enum Opcode {
     ERROR=0x00,
     STARTUP=0x01,
@@ -51,7 +50,7 @@ pub enum Opcode {
 }
 
 #[repr(C, packed)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct Length {pub length:u32}
 
 impl fmt::Show for Length {
